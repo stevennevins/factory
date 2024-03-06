@@ -7,19 +7,19 @@ import {SSTORE2} from "@0xsequence/sstore2/contracts/SSTORE2.sol";
 contract ContractFactory {
     mapping(bytes32 => address) public cache;
 
-    event CodeAdded(bytes32 indexed creationCodeHash, address indexed pointer);
-    event CodeRemoved(bytes32 indexed creationCodeHash, address indexed pointer);
-    event ContractDeployed(address indexed deployer, address indexed addr);
-    event ContractDeployed(address indexed deployer, address indexed addr, bytes32 salt);
+    event CodeAdded(bytes32 indexed codehash, address indexed pointer, string name);
+    event CodeRemoved(bytes32 indexed codehash, address indexed pointer);
+    event ContractDeployed(address indexed deployer, bytes32 indexed codehash, address indexed addr);
+    event ContractDeployed(address indexed deployer, bytes32 indexed codehash, address indexed addr, bytes32 salt);
 
     error TemplateNotFound();
     error InvalidSalt();
 
-    function storeCode(bytes calldata creationCode) external {
+    function storeCode(bytes calldata creationCode, string calldata name) external {
         bytes32 codeHash = keccak256(creationCode);
         address pointer = SSTORE2.write(creationCode);
         cache[codeHash] = pointer;
-        emit CodeAdded(codeHash, pointer);
+        emit CodeAdded(codeHash, pointer, name);
     }
 
     function removeCode(bytes32 codeHash) external {
@@ -41,12 +41,16 @@ contract ContractFactory {
     }
 
     function saferDeploy2(bytes32 templateHash, bytes32 salt, bytes calldata constructorArgs) external {
-        if (address(bytes20(salt)) != msg.sender) revert InvalidSalt();
+        if (address(bytes20(salt)) != msg.sender) {
+            revert InvalidSalt();
+        }
         _deploy2(templateHash, salt, constructorArgs);
     }
 
     function saferDeploy3(bytes32 templateHash, bytes32 salt, bytes calldata constructorArgs) external {
-        if (address(bytes20(salt)) != msg.sender) revert InvalidSalt();
+        if (address(bytes20(salt)) != msg.sender) {
+            revert InvalidSalt();
+        }
         _deploy3(templateHash, salt, constructorArgs);
     }
 
@@ -60,7 +64,7 @@ contract ContractFactory {
         bytes memory initCode = abi.encodePacked(templateCode, constructorArgs);
         address contractAddress = Create3.create3(salt, initCode);
 
-        emit ContractDeployed(msg.sender, contractAddress, salt);
+        emit ContractDeployed(msg.sender, templateHash, contractAddress, salt);
     }
     function _deploy(bytes32 templateHash, bytes calldata constructorArgs) internal {
         address templatePointer = cache[templateHash];
@@ -75,7 +79,7 @@ contract ContractFactory {
             contractAddress := create(0, add(initCode, 32), mload(initCode))
         }
 
-        emit ContractDeployed(msg.sender, contractAddress);
+        emit ContractDeployed(msg.sender, templateHash, contractAddress);
     }
 
     function _deploy2(bytes32 templateHash, bytes32 salt, bytes calldata constructorArgs) internal {
@@ -91,6 +95,6 @@ contract ContractFactory {
             contractAddress := create2(0, add(initCode, 32), mload(initCode), salt)
         }
 
-        emit ContractDeployed(msg.sender, contractAddress, salt);
+        emit ContractDeployed(msg.sender, templateHash, contractAddress, salt);
     }
 }
