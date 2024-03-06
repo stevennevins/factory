@@ -2,6 +2,7 @@
   "dependencies": {
     "@0xsequence/create3": "github:0xsequence/create3",
     "@0xsequence/sstore2": "github:0xsequence/sstore2",
+    "@openzeppelin/contracts": "^5.0.2",
     "ds-test": "github:dapphub/ds-test",
     "forge-std": "github:foundry-rs/forge-std"
   },

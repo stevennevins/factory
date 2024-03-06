@@ -7,5 +7,6 @@ remappings = [
   "ds-test/=node_modules/ds-test/src/",
   "sstore2/=node_modules/@0xsequence/sstore2/contracts/",
   "create3/=node_modules/@0xsequence/create3/contracts/",
+  "@openzeppelin/=node_modules/@openzeppelin/contracts/",
 ]
 gas_report = []

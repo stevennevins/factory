@@ -3,8 +3,9 @@ pragma solidity ^0.8.24;
 
 import {Create3} from "@0xsequence/create3/contracts/Create3.sol";
 import {SSTORE2} from "@0xsequence/sstore2/contracts/SSTORE2.sol";
+import {Multicall} from "@openzeppelin/utils/Multicall.sol";
 
-contract ContractFactory {
+contract ContractFactory is Multicall {
     mapping(bytes32 => address) public cache;
 
     event CodeAdded(bytes32 indexed codehash, address indexed pointer, string name);
